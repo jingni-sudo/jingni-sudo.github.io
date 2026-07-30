@@ -10,9 +10,12 @@
   <body>
     <header class="site-header">
       <a class="brand" href="#home">임지은</a>
-      <nav aria-label="주요 메뉴">
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-navigation">Menu</button>
+      <nav id="site-navigation" aria-label="주요 메뉴">
         <a href="#about">About</a>
+        <a href="#experience">Experience</a>
         <a href="#skills">Skills</a>
+        <a href="#contact">Contact</a>
         <a href="#games">Games</a>
       </nav>
     </header>
@@ -30,6 +33,12 @@
         <p>Android App 개발 10년의 경험을 바탕으로 사용하기 편한 제품을 만듭니다.</p>
       </section>
 
+      <section id="experience" class="content-section" aria-labelledby="experience-title">
+        <p class="eyebrow">Experience</p>
+        <h2 id="experience-title">Android 앱 개발 10년</h2>
+        <p>모바일 제품의 흐름을 이해하고, 사용자가 편안하게 사용할 수 있는 화면과 상호작용을 설계합니다.</p>
+      </section>
+
       <section id="skills" class="content-section" aria-labelledby="skills-title">
         <p class="eyebrow">Skills</p>
         <h2 id="skills-title">주요 기술</h2>
@@ -41,11 +50,36 @@
         </ul>
       </section>
 
+      <section id="contact" class="content-section" aria-labelledby="contact-title">
+        <p class="eyebrow">Contact</p>
+        <h2 id="contact-title">연락처는 공개하지 않습니다.</h2>
+        <p>개인정보 보호를 위해 공개 연락처와 소셜 링크를 제공하지 않습니다.</p>
+      </section>
+
       <section id="games" class="game-section" aria-labelledby="games-title">
         <p class="eyebrow">Games</p>
         <h2 id="games-title">지렁이 게임</h2>
-        <p>게임 영역을 준비했습니다. 조작과 게임 규칙은 다음 개발 루프에서 구현합니다.</p>
-        <div class="game-placeholder" aria-live="polite">Game area coming soon</div>
+        <p>별을 모으고 폭탄과 적을 피하며 오래 살아남으세요.</p>
+        <div class="game-shell">
+          <div class="game-toolbar" aria-live="polite">
+            <span>점수 <strong id="score">0</strong></span>
+            <span>최고 <strong id="high-score">0</strong></span>
+            <span id="game-status">시작 전</span>
+          </div>
+          <canvas id="game-canvas" width="720" height="420" role="img" aria-label="지렁이 게임 화면"></canvas>
+          <div class="game-actions">
+            <button id="start-game" type="button">시작</button>
+            <button id="pause-game" type="button" disabled>일시정지</button>
+            <button id="restart-game" type="button">재시작</button>
+          </div>
+          <div class="d-pad" aria-label="모바일 방향 조작">
+            <button type="button" data-direction="up" aria-label="위">↑</button>
+            <button type="button" data-direction="left" aria-label="왼쪽">←</button>
+            <button type="button" data-direction="down" aria-label="아래">↓</button>
+            <button type="button" data-direction="right" aria-label="오른쪽">→</button>
+          </div>
+          <p class="game-help">방향키·WASD·화면 버튼·스와이프 지원 · 일시정지: P</p>
+        </div>
       </section>
     </main>
 
