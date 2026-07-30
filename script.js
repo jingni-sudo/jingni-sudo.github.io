@@ -40,6 +40,11 @@ const DIRECTIONS = {
   left: { x: -1, y: 0 },
   right: { x: 1, y: 0 },
 };
+const SPACE_DUST = [
+  [34, 42, 1], [92, 106, 1.5], [158, 58, 1], [224, 142, 1.2], [296, 76, .8], [366, 38, 1.4],
+  [438, 122, 1], [512, 64, 1.3], [586, 154, .9], [662, 48, 1.2], [54, 304, 1.1], [132, 366, .8],
+  [208, 278, 1.4], [286, 338, .9], [354, 244, 1.1], [428, 354, 1.5], [506, 292, .8], [574, 374, 1.2], [664, 266, 1]
+];
 
 let game = null;
 let animationFrame = null;
@@ -124,9 +129,11 @@ function setDirection(directionName) {
 
 function handleKey(event) {
   const keyMap = { ArrowUp: "up", w: "up", W: "up", ArrowDown: "down", s: "down", S: "down", ArrowLeft: "left", a: "left", A: "left", ArrowRight: "right", d: "right", D: "right" };
-  if (keyMap[event.key]) {
+  const codeMap = { ArrowUp: "up", KeyW: "up", ArrowDown: "down", KeyS: "down", ArrowLeft: "left", KeyA: "left", ArrowRight: "right", KeyD: "right" };
+  const direction = keyMap[event.key] || codeMap[event.code];
+  if (direction) {
     event.preventDefault();
-    setDirection(keyMap[event.key]);
+    setDirection(direction);
   }
   if (event.key.toLowerCase() === "p") togglePause();
 }
@@ -230,8 +237,18 @@ function drawStar(star) {
 function drawGame() {
   if (!context || !game) return;
   context.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
-  context.fillStyle = "#2f2722";
+  const spaceGradient = context.createLinearGradient(0, 0, GAME_WIDTH, GAME_HEIGHT);
+  spaceGradient.addColorStop(0, "#0b1020");
+  spaceGradient.addColorStop(0.55, "#171b35");
+  spaceGradient.addColorStop(1, "#241b35");
+  context.fillStyle = spaceGradient;
   context.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+  context.fillStyle = "#9aa8c4";
+  SPACE_DUST.forEach(([x, y, radius]) => {
+    context.beginPath();
+    context.arc(x, y, radius, 0, Math.PI * 2);
+    context.fill();
+  });
   game.stars.forEach(drawStar);
   game.enemies.forEach((enemy) => {
     context.fillStyle = "#c15f3c";
@@ -251,30 +268,57 @@ function drawGame() {
     context.textAlign = "center";
     context.fillText(exploding ? "!" : Math.max(0, Math.ceil((BOMB_COUNTDOWN - (game.elapsed - bomb.createdAt)) / 1000)), bomb.x, bomb.y + 4);
   });
-  game.player.forEach((segment, index) => {
-    context.fillStyle = index === 0 ? "#f5f1e8" : "#b7c7a2";
+  if (game.player.length > 1) {
+    context.strokeStyle = "#c96b4d";
+    context.lineCap = "round";
+    context.lineJoin = "round";
+    context.lineWidth = 14;
     context.beginPath();
-    context.arc(segment.x, segment.y, index === 0 ? 9 : 7, 0, Math.PI * 2);
+    game.player.forEach((segment, index) => {
+      index === 0 ? context.moveTo(segment.x, segment.y) : context.lineTo(segment.x, segment.y);
+    });
+    context.stroke();
+  }
+  game.player.forEach((segment, index) => {
+    const radius = Math.max(4.5, 10 - index * 0.45);
+    context.fillStyle = index === 0 ? "#d97757" : "#c96b4d";
+    context.beginPath();
+    context.arc(segment.x, segment.y, radius, 0, Math.PI * 2);
+    context.fill();
+  });
+  const head = game.player[0];
+  const perpendicular = { x: -game.direction.y, y: game.direction.x };
+  const eyeCenter = { x: head.x + game.direction.x * 3, y: head.y + game.direction.y * 3 };
+  context.fillStyle = "#2f2722";
+  [1, -1].forEach((side) => {
+    context.beginPath();
+    context.arc(eyeCenter.x + perpendicular.x * side * 3, eyeCenter.y + perpendicular.y * side * 3, 1.8, 0, Math.PI * 2);
     context.fill();
   });
 }
 
 function gameLoop(timestamp) {
-  if (!game.running) return;
+  if (!game.running) {
+    animationFrame = null;
+    return;
+  }
   const delta = Math.min((timestamp - game.lastTimestamp) / 1000 || 0, 0.05);
   game.lastTimestamp = timestamp;
   if (!game.paused && !game.gameOver) update(delta);
   drawGame();
-  animationFrame = requestAnimationFrame(gameLoop);
+  if (game.running) animationFrame = requestAnimationFrame(gameLoop);
+  else animationFrame = null;
 }
 
-function startGame() {
-  if (game.running && !game.gameOver) return;
+function startGame(forceRestart = false) {
+  if (!forceRestart && game.running && !game.gameOver && !game.paused) return;
   resetGame();
   game.running = true;
   game.lastTimestamp = performance.now();
+  canvas?.focus({ preventScroll: true });
   startButton.disabled = true;
   pauseButton.disabled = false;
+  pauseButton.textContent = "일시정지";
   updateHud("진행 중");
   if (animationFrame === null) animationFrame = requestAnimationFrame(gameLoop);
 }
@@ -319,7 +363,7 @@ function handleSwipeEnd(event) {
   else setDirection(dy > 0 ? "down" : "up");
 }
 
-document.addEventListener("keydown", handleKey);
+window.addEventListener("keydown", handleKey, { capture: true });
 document.querySelectorAll("[data-direction]").forEach((button) => {
   button.addEventListener("pointerdown", () => setDirection(button.dataset.direction));
 });
@@ -327,6 +371,6 @@ canvas?.addEventListener("pointerdown", handleSwipeStart);
 canvas?.addEventListener("pointerup", handleSwipeEnd);
 startButton?.addEventListener("click", startGame);
 pauseButton?.addEventListener("click", togglePause);
-restartButton?.addEventListener("click", startGame);
+restartButton?.addEventListener("click", () => startGame(true));
 
 resetGame();

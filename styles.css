@@ -44,7 +44,8 @@ h2 { font-size: clamp(2rem, 4vw, 3.5rem); max-width: 720px; }
 .game-shell { background: #e9dfd2; border: 1px solid var(--line); border-radius: 1.25rem; margin-top: 2rem; max-width: 760px; overflow: hidden; padding: 1rem; }
 .game-toolbar { align-items: center; display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; padding: .25rem .5rem 1rem; }
 .game-toolbar span:last-child { color: var(--accent); font-weight: 700; }
-#game-canvas { background: #2f2722; border: 1px solid #59493f; border-radius: .75rem; display: block; height: auto; max-width: 100%; touch-action: none; width: 720px; }
+#game-canvas { background: #111827; border: 1px solid #59493f; border-radius: .75rem; display: block; height: auto; max-width: 100%; outline: none; touch-action: none; width: 720px; }
+#game-canvas:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
 .game-actions { display: flex; flex-wrap: wrap; gap: .6rem; padding: 1rem .5rem .5rem; }
 .game-actions button, .d-pad button { background: var(--paper); border: 1px solid var(--line); border-radius: 999px; color: var(--ink); cursor: pointer; font: inherit; padding: .5rem 1rem; }
 .game-actions button:hover, .d-pad button:hover { border-color: var(--accent); color: var(--accent); }
